@@ -1,0 +1,19 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "n8n": {
+      "type": "remote",
+      "url": "https://<你的ngrok公開網域>/mcp-server/http",
+      "enabled": true,
+      "headers": {
+        // 【模式一：OAuth 授權（新功能）】
+        // 若使用 OAuth 自動授權流程，通常只需保留 Accept-Encoding，無需設定 Authorization
+        "Accept-Encoding": "identity"
+        // 【模式二：Access Token 授權（舊版 / 備援穩定方式）】
+        // 若 OAuth 無法自動授權，請取消下方註解並填入 n8n 產生的 Access Token：
+        // "Authorization": "Bearer <你的_n8n_ACCESS_TOKEN>",
+        // "Accept-Encoding": "identity"
+      }
+    }
+  }
+}
