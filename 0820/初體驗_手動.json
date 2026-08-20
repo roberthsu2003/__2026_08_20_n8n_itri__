@@ -1,0 +1,81 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "getAllPeople"
+      },
+      "type": "n8n-nodes-base.n8nTrainingCustomerDatastore",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        -32
+      ],
+      "id": "d64907ff-47a9-4e65-af89-aa63b7fa369b",
+      "name": "取得偽資料"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2a97e27c-ab89-4276-83c3-0a5263f18611",
+              "name": "=編號",
+              "value": "=這是編號:{{$json.id}}結束",
+              "type": "string"
+            },
+            {
+              "id": "3585db6d-2a00-401b-b8ce-9bea46562e16",
+              "name": "=姓名",
+              "value": "=我的姓名是{{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "bf5012b9-0c37-4b0d-9df2-0b81dc2d2437",
+              "name": "郵件",
+              "value": "=我的郵件{{ $json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "51ccffe8-4be6-4e12-a72d-ff867b27b5d3",
+              "name": "註解",
+              "value": "={{ $json.notes }}",
+              "type": "string"
+            },
+            {
+              "id": "7a1c7568-fa73-4f43-8472-c088f65fce2f",
+              "name": "國家",
+              "value": "={{ $json.country }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        0,
+        -32
+      ],
+      "id": "545f8b8f-3191-4be9-8ba6-865e5aff62bb",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "取得偽資料": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  }
+}
