@@ -1,0 +1,200 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## 🚀🚀 從這裏開始 🚀🚀\n\n1. 按\"執行這裏\",開始執行\n\n2. 這會透過Internet取得隨機引言\n\n3. 按最後一個節點,取很我自得到什麼?\n",
+        "height": 272,
+        "width": 1104,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "78ec6cdc-1db6-4c80-b27b-33fb2e65a96c",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        320,
+        96
+      ],
+      "id": "0d4b633f-889a-41dc-91c9-00074922a561",
+      "name": "當按下這裏時執行"
+    },
+    {
+      "parameters": {
+        "url": "https://zenquotes.io/api/random",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        544,
+        96
+      ],
+      "id": "694f816d-197f-47a2-8697-7a24d04bfdbe",
+      "name": "透過internet取得隨機引言"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "english-quote",
+              "name": "英文原文",
+              "value": "={{ $('透過internet取得隨機引言').item.json.q }}",
+              "type": "string"
+            },
+            {
+              "id": "quote-author",
+              "name": "作者",
+              "value": "={{ $('透過internet取得隨機引言').item.json.a }}",
+              "type": "string"
+            },
+            {
+              "id": "chinese-translation",
+              "name": "中文翻譯",
+              "value": "={{ $json.output.chinese_translation }}",
+              "type": "string"
+            },
+            {
+              "id": "action-inspiration",
+              "name": "今日行動建議與啟發",
+              "value": "={{ $json.output.action_inspiration }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1152,
+        96
+      ],
+      "id": "59074978-cd39-419b-8183-4cef9c8494c8",
+      "name": "輸出結構化 JSON"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=你是一位精通英文哲理與繁體中文文學表達的編輯。\n\n請處理以下英文名言：\n英文原文：{{ $json.q }}\n作者：{{ $json.a }}\n\n任務：\n1. 將英文名言翻譯成自然、優美、忠於原意的繁體中文。\n2. 根據名言生成一句「今日行動建議與啟發」，必須使用繁體中文且不超過 30 個中文字。\n3. 英文原文與作者必須原樣保留。\n4. 僅依照指定的結構化格式輸出，不要加入 Markdown、說明或其他欄位。",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "id": "90faba82-1d2a-4883-a080-54ddaaf0cd51",
+      "name": "AI 哲理翻譯與啟發",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        800,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gpt-oss:20b-cloud",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "1ca74e09-45c1-47c8-98b2-c76358b53972",
+      "name": "Ollama Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        720,
+        352
+      ],
+      "credentials": {
+        "ollamaApi": {
+          "id": "2tCjXbnaN4Jwi9pI",
+          "name": "Ollama account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\"english_quote\":\"The original English quote\",\"author\":\"Quote author\",\"chinese_translation\":\"優美且忠於原意的繁體中文翻譯\",\"action_inspiration\":\"30 個中文字以內的今日行動建議與啟發\"}"
+      },
+      "id": "0762dcdc-0358-456f-ad82-300797a3642a",
+      "name": "結構化 JSON 解析器",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        944,
+        352
+      ]
+    }
+  ],
+  "connections": {
+    "當按下這裏時執行": {
+      "main": [
+        [
+          {
+            "node": "透過internet取得隨機引言",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "透過internet取得隨機引言": {
+      "main": [
+        [
+          {
+            "node": "AI 哲理翻譯與啟發",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI 哲理翻譯與啟發": {
+      "main": [
+        [
+          {
+            "node": "輸出結構化 JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI 哲理翻譯與啟發",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "結構化 JSON 解析器": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI 哲理翻譯與啟發",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  }
+}
