@@ -1,0 +1,271 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Webhook 網頁使用方式\n\n1. 發布此工作流。\n2. 以 GET 呼叫 `/webhook/daily-ai-quote`。\n3. 工作流會產生隨機哲理金句，並回傳包含 HTML、CSS 與 JavaScript 的響應式網頁。",
+        "height": 272,
+        "width": 1328,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "90422aca-e3d7-4337-b121-297ce539ed2d",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "url": "https://zenquotes.io/api/random",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        544,
+        96
+      ],
+      "id": "d58509b2-6952-44fc-91d0-398f009d1006",
+      "name": "透過internet取得隨機引言"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "english-quote",
+              "name": "英文原文",
+              "value": "={{ $('透過internet取得隨機引言').item.json.q }}",
+              "type": "string"
+            },
+            {
+              "id": "quote-author",
+              "name": "作者",
+              "value": "={{ $('透過internet取得隨機引言').item.json.a }}",
+              "type": "string"
+            },
+            {
+              "id": "chinese-translation",
+              "name": "中文翻譯",
+              "value": "={{ $json.output.chinese_translation }}",
+              "type": "string"
+            },
+            {
+              "id": "action-inspiration",
+              "name": "今日行動建議與啟發",
+              "value": "={{ $json.output.action_inspiration }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1152,
+        96
+      ],
+      "id": "50b1e57b-4345-4f0c-a063-2b7628c1ab4a",
+      "name": "輸出結構化 JSON"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=你是一位精通英文哲理與繁體中文文學表達的編輯。\n\n請處理以下英文名言：\n英文原文：{{ $json.q }}\n作者：{{ $json.a }}\n\n任務：\n1. 將英文名言翻譯成自然、優美、忠於原意的繁體中文。\n2. 根據名言生成一句「今日行動建議與啟發」，必須使用繁體中文且不超過 30 個中文字。\n3. 英文原文與作者必須原樣保留。\n4. 僅依照指定的結構化格式輸出，不要加入 Markdown、說明或其他欄位。",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "id": "9ba33262-6055-4254-b563-ad55ef610a2d",
+      "name": "AI 哲理翻譯與啟發",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [
+        800,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "model": "gpt-oss:20b-cloud",
+        "options": {
+          "temperature": 0.3
+        }
+      },
+      "id": "f3524f16-a897-4cb4-95e8-b0aeb85c65c3",
+      "name": "Ollama Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOllama",
+      "typeVersion": 1,
+      "position": [
+        720,
+        352
+      ],
+      "credentials": {
+        "ollamaApi": {
+          "id": "2tCjXbnaN4Jwi9pI",
+          "name": "Ollama account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\"english_quote\":\"The original English quote\",\"author\":\"Quote author\",\"chinese_translation\":\"優美且忠於原意的繁體中文翻譯\",\"action_inspiration\":\"30 個中文字以內的今日行動建議與啟發\"}"
+      },
+      "id": "ed3aee32-ea94-4f59-babd-0cef499f4d8e",
+      "name": "結構化 JSON 解析器",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        944,
+        352
+      ]
+    },
+    {
+      "parameters": {
+        "path": "daily-ai-quote",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "d0822a6a-3c0a-41c5-a06d-3a3272f0a7d8",
+      "name": "接收 Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        320,
+        96
+      ],
+      "webhookId": "5180933b-069f-4824-8644-3a305fa9dad3"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.html }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "text/html; charset=utf-8"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-store"
+              }
+            ]
+          }
+        }
+      },
+      "id": "27e26823-0a00-4858-9154-2aa2cb77a0ea",
+      "name": "回傳 Webhook 結果",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1600,
+        96
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "const escapeHtml = (value) => String(value ?? '')\n  .replaceAll('&', '&amp;')\n  .replaceAll('<', '&lt;')\n  .replaceAll('>', '&gt;')\n  .replaceAll('\"', '&quot;')\n  .replaceAll(\"'\", '&#039;');\n\nconst english = escapeHtml($json['英文原文']);\nconst author = escapeHtml($json['作者']);\nconst translation = escapeHtml($json['中文翻譯']);\nconst inspiration = escapeHtml($json['今日行動建議與啟發']);\n\nconst html = `<!doctype html>\n<html lang=\"zh-Hant\">\n<head>\n  <meta charset=\"utf-8\">\n  <meta name=\"viewport\" content=\"width=device-width, initial-scale=1\">\n  <meta name=\"theme-color\" content=\"#102d27\">\n  <title>今日哲思</title>\n  <style>\n    :root { --ink:#102d27; --paper:#f5f0e5; --gold:#c8994b; --soft:#dfe9e2; }\n    * { box-sizing:border-box; }\n    body { margin:0; min-height:100vh; color:var(--ink); background:var(--paper); font-family:\"Noto Serif TC\",\"Songti TC\",\"Times New Roman\",serif; overflow-x:hidden; }\n    body::before { content:\"\"; position:fixed; inset:0; pointer-events:none; opacity:.55; background:radial-gradient(circle at 16% 18%,rgba(200,153,75,.20),transparent 32%),radial-gradient(circle at 85% 82%,rgba(16,45,39,.16),transparent 34%); }\n    .shell { position:relative; min-height:100vh; display:grid; place-items:center; padding:clamp(24px,5vw,72px); }\n    .frame { width:min(920px,100%); border:1px solid rgba(16,45,39,.24); padding:clamp(8px,1.4vw,14px); box-shadow:0 30px 80px rgba(16,45,39,.15); background:rgba(245,240,229,.65); backdrop-filter:blur(8px); }\n    .card { position:relative; min-height:600px; display:flex; flex-direction:column; justify-content:space-between; gap:42px; padding:clamp(30px,7vw,84px); border:1px solid rgba(16,45,39,.16); background:linear-gradient(145deg,rgba(255,255,255,.78),rgba(223,233,226,.5)); overflow:hidden; }\n    .card::after { content:\"“\"; position:absolute; right:3%; top:-9%; color:rgba(200,153,75,.14); font-size:clamp(180px,36vw,360px); line-height:1; pointer-events:none; }\n    .topline { display:flex; align-items:center; justify-content:space-between; gap:20px; font:600 12px/1.2 system-ui,sans-serif; letter-spacing:.24em; text-transform:uppercase; }\n    .mark { display:flex; align-items:center; gap:12px; }\n    .mark::before { content:\"\"; width:34px; height:2px; background:var(--gold); }\n    #date { color:rgba(16,45,39,.58); letter-spacing:.08em; }\n    main { position:relative; z-index:1; }\n    .translation { max-width:720px; margin:0; font-size:clamp(32px,6vw,62px); font-weight:600; line-height:1.45; letter-spacing:.05em; text-wrap:balance; }\n    .author { margin:26px 0 0; color:var(--gold); font:600 clamp(13px,1.8vw,16px)/1.5 system-ui,sans-serif; letter-spacing:.12em; }\n    .original { max-width:650px; margin:24px 0 0; color:rgba(16,45,39,.62); font-size:clamp(15px,2vw,19px); font-style:italic; line-height:1.7; }\n    .footer { display:grid; grid-template-columns:1fr auto; gap:28px; align-items:end; padding-top:28px; border-top:1px solid rgba(16,45,39,.18); }\n    .label { margin:0 0 9px; color:rgba(16,45,39,.55); font:700 11px/1.2 system-ui,sans-serif; letter-spacing:.22em; }\n    .action { margin:0; font-size:clamp(18px,2.6vw,25px); line-height:1.55; }\n    .buttons { display:flex; gap:10px; }\n    button { appearance:none; border:1px solid var(--ink); border-radius:999px; padding:12px 18px; color:var(--ink); background:transparent; font:700 13px/1 system-ui,sans-serif; cursor:pointer; transition:transform .2s,background .2s,color .2s; white-space:nowrap; }\n    button:hover { transform:translateY(-2px); background:var(--ink); color:var(--paper); }\n    button.primary { color:var(--paper); background:var(--ink); }\n    button.primary:hover { background:#1b493f; }\n    @media (max-width:680px) { .card{min-height:calc(100vh - 48px);gap:32px}.footer{grid-template-columns:1fr}.buttons{width:100%}button{flex:1}.topline{align-items:flex-start;flex-direction:column}.translation{font-size:clamp(30px,10vw,48px)} }\n    @media (prefers-reduced-motion:no-preference) { .frame{animation:rise .7s cubic-bezier(.2,.7,.2,1) both} main{animation:rise .8s .12s cubic-bezier(.2,.7,.2,1) both}@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}} }\n  </style>\n</head>\n<body>\n  <div class=\"shell\">\n    <div class=\"frame\">\n      <article class=\"card\">\n        <header class=\"topline\"><span class=\"mark\">Daily Perspective</span><time id=\"date\"></time></header>\n        <main>\n          <blockquote class=\"translation\" id=\"quote\">${translation}</blockquote>\n          <p class=\"author\">— ${author}</p>\n          <p class=\"original\" id=\"original\">${english}</p>\n        </main>\n        <footer class=\"footer\">\n          <div><p class=\"label\">TODAY'S PRACTICE</p><p class=\"action\">${inspiration}</p></div>\n          <div class=\"buttons\"><button id=\"copy\" type=\"button\">複製金句</button><button class=\"primary\" id=\"refresh\" type=\"button\">再抽一句</button></div>\n        </footer>\n      </article>\n    </div>\n  </div>\n  <script>\n    const date = new Intl.DateTimeFormat('zh-TW',{year:'numeric',month:'long',day:'numeric',weekday:'long'}).format(new Date());\n    document.getElementById('date').textContent = date;\n    document.getElementById('refresh').addEventListener('click',()=>location.reload());\n    document.getElementById('copy').addEventListener('click',async(event)=>{\n      const authorText = document.querySelector('.author').textContent.replace('—', '').trim();\n      const text = document.getElementById('quote').textContent + ' — ' + authorText;\n      try { await navigator.clipboard.writeText(text); event.currentTarget.textContent='已複製'; setTimeout(()=>event.currentTarget.textContent='複製金句',1600); }\n      catch { event.currentTarget.textContent='複製失敗'; }\n    });\n  </script>\n</body>\n</html>`;\n\nreturn { json: { html } };"
+      },
+      "id": "f7afe9cb-159e-420a-a96d-822fa1bc0cec",
+      "name": "建立美觀網頁",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1376,
+        96
+      ],
+      "notes": "將 AI 產生的內容安全轉義，組成含響應式 CSS 與互動 JavaScript 的完整 HTML 頁面。"
+    }
+  ],
+  "connections": {
+    "透過internet取得隨機引言": {
+      "main": [
+        [
+          {
+            "node": "AI 哲理翻譯與啟發",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "輸出結構化 JSON": {
+      "main": [
+        [
+          {
+            "node": "建立美觀網頁",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI 哲理翻譯與啟發": {
+      "main": [
+        [
+          {
+            "node": "輸出結構化 JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Ollama Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI 哲理翻譯與啟發",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "結構化 JSON 解析器": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI 哲理翻譯與啟發",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "接收 Webhook": {
+      "main": [
+        [
+          {
+            "node": "透過internet取得隨機引言",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "建立美觀網頁": {
+      "main": [
+        [
+          {
+            "node": "回傳 Webhook 結果",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "aiBuilderAssisted": true,
+    "builderVariant": "mcp",
+    "instanceId": "d135f5bcfa8bdece905b6d778df94a7be68624c12d1878e14ba64eeb17a04d82"
+  }
+}
